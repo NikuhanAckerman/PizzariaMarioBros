@@ -1,0 +1,7 @@
+.pizza-card {
+    transition: 0.25s;
+}
+
+.pizza-card:hover {
+    scale: 1.05;
+}

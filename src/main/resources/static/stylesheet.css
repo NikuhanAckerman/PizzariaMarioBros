@@ -1,0 +1,36 @@
+@import url('https://fonts.cdnfonts.com/css/new-super-mario-font-u');
+
+nav {
+    margin: 0 0 10px 0 !important;
+    padding: 0 !important;
+    background-color: black !important;
+}
+
+.brand-logo {
+    padding: 0;
+    margin: 0;
+    height: 120px;
+    width: 120px;
+}
+
+.header-text {
+    font-family: 'New Super Mario Font U', sans-serif;
+}
+
+.navbar-btn {
+    height: 35px;
+    font-size: 1.2rem;
+    font-family: 'New Super Mario Font U', sans-serif;
+    color: #ffe400;
+    margin: 10px;
+    border-radius: 10px;
+    border: solid 2px;
+    border-color: #ffe400;
+    background-color: black;
+    transition: .25s;
+}
+
+.navbar-btn:hover {
+    background-color: white;
+    color: black;
+}
