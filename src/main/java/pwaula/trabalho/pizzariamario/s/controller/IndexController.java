@@ -3,6 +3,7 @@ package pwaula.trabalho.pizzariamario.s.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 import pwaula.trabalho.pizzariamario.s.dto.PizzaDTO;
 import pwaula.trabalho.pizzariamario.s.model.PizzaEntity;
@@ -21,6 +22,7 @@ public class IndexController {
     public ModelAndView index() {
         List<PizzaEntity> listOfPizzas = pizzaRepository.findAll();
         List<PizzaDTO> listOfPizzaDTOs = new ArrayList<PizzaDTO>();
+
         for (PizzaEntity pizza : listOfPizzas) {
             PizzaDTO pizzaDTO = new PizzaDTO();
             pizzaDTO.setName(pizza.getName());
@@ -31,10 +33,14 @@ public class IndexController {
             listOfPizzaDTOs.add(pizzaDTO);
         }
 
-        System.out.println(listOfPizzaDTOs);
-
         ModelAndView mv = new ModelAndView("index");
         mv.addObject("pizzas", listOfPizzaDTOs);
+        return mv;
+    }
+
+    @GetMapping("/login")
+    public ModelAndView login() {
+        ModelAndView mv = new ModelAndView("login");
         return mv;
     }
 }

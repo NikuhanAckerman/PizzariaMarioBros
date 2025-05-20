@@ -6,7 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
+import pwaula.trabalho.pizzariamario.s.model.CartEntity;
+import pwaula.trabalho.pizzariamario.s.model.ClientEntity;
 import pwaula.trabalho.pizzariamario.s.model.PizzaEntity;
+import pwaula.trabalho.pizzariamario.s.repository.ClientRepository;
 import pwaula.trabalho.pizzariamario.s.repository.PizzaRepository;
 
 import java.lang.reflect.Field;
@@ -25,6 +28,9 @@ public class AppInitializer implements CommandLineRunner {
 
     @Autowired
     private PizzaRepository pizzaRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -76,6 +82,39 @@ public class AppInitializer implements CommandLineRunner {
             pizzaRepository.saveAll(pizzaList);
 
             System.out.println("Tabela de pizzas populada.");
+        }
+
+        // Populate clients
+        if (clientRepository.count() == 0) {
+            System.out.println("Populando tabela de clientes...");
+
+            List<ClientEntity> clientList = new ArrayList<>();
+
+            ClientEntity client1 = new ClientEntity();
+            client1.setName("Mario Bros");
+            client1.setEmail("mario@example.com");
+            client1.setPassword("1234"); // In real life, encrypt this
+            client1.setPhone("11999999999");
+            client1.setAddress("Rua do Cogumelo, 123");
+            client1.setCpf("123.456.789-00");
+            client1.setCart(new CartEntity());  // Or new CartEntity()
+            client1.setOrdersDone(new ArrayList<>());
+
+            ClientEntity client2 = new ClientEntity();
+            client2.setName("Luigi Bros");
+            client2.setEmail("luigi@example.com");
+            client2.setPassword("1234");
+            client2.setPhone("11988888888");
+            client2.setAddress("Rua do Toad, 456");
+            client2.setCpf("987.654.321-00");
+            client2.setCart(new CartEntity());
+            client2.setOrdersDone(new ArrayList<>());
+
+            clientList.add(client1);
+            clientList.add(client2);
+
+            clientRepository.saveAll(clientList);
+            System.out.println("Tabela de clientes populada.");
         }
 
     }
