@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" href="/css/stylesheet.css">
+</head>
+<body>
+
+<th:block th:fragment="logoutButton">
+
+    <form th:action="@{/logout}" method="post" style="display: inline;">
+        <button type="submit" class="navbar-btn">
+            <i class="bi bi-box-arrow-right"></i> Sair
+        </button>
+    </form>
+
+</th:block>
+
+<th:block th:fragment="controlPanelButton">
+
+    <form th:action="@{/admin}" method="post" style="display: inline;">
+        <button type="submit" class="navbar-btn">
+            <i class="bi bi-box-arrow-right"></i> Painel de controle
+        </button>
+    </form>
+
+</th:block>
+
+</body>
+</html>

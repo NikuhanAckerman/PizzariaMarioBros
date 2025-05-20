@@ -4,15 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import pwaula.trabalho.pizzariamario.s.model.CartEntity;
-import pwaula.trabalho.pizzariamario.s.model.ClientEntity;
+import pwaula.trabalho.pizzariamario.s.model.UserEntity;
 import pwaula.trabalho.pizzariamario.s.model.PizzaEntity;
-import pwaula.trabalho.pizzariamario.s.repository.ClientRepository;
+import pwaula.trabalho.pizzariamario.s.repository.UserRepository;
 import pwaula.trabalho.pizzariamario.s.repository.PizzaRepository;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +29,10 @@ public class AppInitializer implements CommandLineRunner {
     private PizzaRepository pizzaRepository;
 
     @Autowired
-    private ClientRepository clientRepository;
+    private UserRepository clientRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
@@ -86,35 +88,37 @@ public class AppInitializer implements CommandLineRunner {
 
         // Populate clients
         if (clientRepository.count() == 0) {
-            System.out.println("Populando tabela de clientes...");
+            System.out.println("Populando tabela de usuários...");
 
-            List<ClientEntity> clientList = new ArrayList<>();
+            List<UserEntity> clientList = new ArrayList<>();
 
-            ClientEntity client1 = new ClientEntity();
+            UserEntity client1 = new UserEntity();
             client1.setName("Mario Bros");
             client1.setEmail("mario@example.com");
-            client1.setPassword("1234"); // In real life, encrypt this
+            client1.setPassword(passwordEncoder.encode("senhaDoMarioSuperSegura"));
             client1.setPhone("11999999999");
             client1.setAddress("Rua do Cogumelo, 123");
             client1.setCpf("123.456.789-00");
             client1.setCart(new CartEntity());  // Or new CartEntity()
+            client1.setRoles("ADMIN");
             client1.setOrdersDone(new ArrayList<>());
 
-            ClientEntity client2 = new ClientEntity();
+            UserEntity client2 = new UserEntity();
             client2.setName("Luigi Bros");
             client2.setEmail("luigi@example.com");
-            client2.setPassword("1234");
+            client2.setPassword(passwordEncoder.encode("senhaDoLuigiSuperSegura"));
             client2.setPhone("11988888888");
             client2.setAddress("Rua do Toad, 456");
             client2.setCpf("987.654.321-00");
             client2.setCart(new CartEntity());
+            client2.setRoles("ADMIN");
             client2.setOrdersDone(new ArrayList<>());
 
             clientList.add(client1);
             clientList.add(client2);
 
             clientRepository.saveAll(clientList);
-            System.out.println("Tabela de clientes populada.");
+            System.out.println("Tabela de usuários populada.");
         }
 
     }

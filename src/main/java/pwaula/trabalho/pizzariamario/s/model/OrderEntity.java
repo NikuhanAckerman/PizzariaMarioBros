@@ -1,6 +1,5 @@
 package pwaula.trabalho.pizzariamario.s.model;
 
-import ch.qos.logback.core.net.server.Client;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -15,7 +14,7 @@ public class OrderEntity {
     @Id
     private String id;
 
-    private ClientEntity client;
+    private UserEntity client;
 
     private LocalDateTime timeOrderFinished;
 

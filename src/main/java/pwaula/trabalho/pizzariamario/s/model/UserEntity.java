@@ -5,11 +5,12 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "ClientEntity")
 @Getter @Setter
-public class ClientEntity {
+public class UserEntity {
 
     @Id
     private String id;
@@ -28,6 +29,8 @@ public class ClientEntity {
 
     private CartEntity cart;
 
-    private List<OrderEntity> ordersDone;
+    private List<OrderEntity> ordersDone = new ArrayList<>();
+
+    private String roles;
 
 }
