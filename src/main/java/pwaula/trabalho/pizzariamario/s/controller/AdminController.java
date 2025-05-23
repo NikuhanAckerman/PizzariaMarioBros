@@ -133,7 +133,7 @@ public class AdminController {
                         pizzaInCartIds,
                         pizzaRepository.findById(pizzaInCartRepository.findById(pizzaInCartIds).get().getPizzaId()).get().getName(),
                         pizzaRepository.findById(pizzaInCartRepository.findById(pizzaInCartIds).get().getPizzaId()).get().getImageUrl(),
-                        pizzaRepository.findById(pizzaInCartRepository.findById(pizzaInCartIds).get().getPizzaId()).get().getPrice(),
+                        pizzaInCartRepository.findById(pizzaInCartIds).get().getIndividualPrice(),
                         pizzaInCartRepository.findById(pizzaInCartIds).get().getTotalPrice(),
                         pizzaInCartRepository.findById(pizzaInCartIds).get().getQuantityOrdered()
                 )).toList()
