@@ -2,28 +2,28 @@ package pwaula.trabalho.pizzariamario.s.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pwaula.trabalho.pizzariamario.s.repository.PizzaRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Document(collection = "PizzaInCartEntity")
+@Document(collection = "LocalOrderEntity")
 @Getter @Setter
-public class PizzaInCartEntity {
+public class LocalOrderEntity {
 
     @Id
     private String id;
 
-    private String pizzaId;
+    private List<String> pizzasOrderedList = new ArrayList<>();
 
-    private String cartId;
+    private LocalOrderTable orderTable;
 
-    private int quantityOrdered;
+    private LocalDateTime orderedAtTime;
 
-    private BigDecimal individualPrice;
+    private LocalDateTime tableFinishedAtTime;
 
     private BigDecimal totalPrice;
 

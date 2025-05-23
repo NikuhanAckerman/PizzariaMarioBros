@@ -36,12 +36,12 @@ public class CustomUserDetails implements UserDetails {
         return user.getCpf();
     }
 
-    public CartEntity getCart() {
-        return user.getCart();
+    public String getCartId() {
+        return user.getCartId();
     }
 
-    public List<OrderEntity> getOrdersDone() {
-        return user.getOrdersDone();
+    public List<String> getOrdersDoneId() {
+        return user.getOrdersDoneId();
     }
 
     public String roles() {

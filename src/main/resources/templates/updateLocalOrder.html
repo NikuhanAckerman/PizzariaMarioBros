@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Criar Pedido Local</title>
+  <link rel="stylesheet" href="/css/stylesheet.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Criar Pedido Local</h2>
+  <a class="btn btn-outline-danger mb-4" th:href="@{/admin/vendas/local}">← Voltar</a>
+
+  <form th:action="@{/admin/vendas/local/atualizarPedidoLocal/{localOrderId}(localOrderId = ${newLocalOrderDTO.id})}" method="POST">
+    <input type="hidden" name="_method" value="PUT">
+    <!-- Campo da mesa -->
+    <div class="mb-3">
+      <label for="mesa" class="form-label">Mesa</label>
+      <select id="mesa" name="mesa" class="form-select" required>
+        <option value="" disabled selected>Selecione a mesa</option>
+        <option value="1">MESA_1</option>
+        <option value="2">MESA_2</option>
+        <option value="3">MESA_3</option>
+        <option value="4">MESA_4</option>
+        <option value="5">MESA_5</option>
+        <option value="6">MESA_6</option>
+        <option value="7">MESA_7</option>
+        <option value="8">MESA_8</option>
+      </select>
+    </div>
+
+    <!-- Lista de pizzas -->
+    <div class="mb-3">
+      <label class="form-label">Pizzas Pedidas</label>
+
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        <div class="col" th:each="pizza : ${pizzas}">
+          <div class="card h-100">
+            <img th:src="${pizza.imageUrl}" class="card-img-top" alt="Pizza" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+              <h5 class="card-title" th:text="${pizza.name}">Nome da Pizza</h5>
+              <p class="card-text">Preço: R$ <span th:text="${#numbers.formatDecimal(pizza.price, 1, 2, 'COMMA')}"></span></p>
+
+              <label for="quantidade" class="form-label">Quantidade</label>
+              <input type="number"
+                     class="form-control"
+                     min="0"
+                     max="10"
+                     id="quantidade"
+                     th:name="${pizza.id}"
+                     value="0" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-4">Finalizar Pedido</button>
+  </form>
+</div>
+
+</body>
+</html>

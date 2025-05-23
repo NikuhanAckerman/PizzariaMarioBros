@@ -7,5 +7,4 @@ import pwaula.trabalho.pizzariamario.s.model.PizzaEntity;
 
 @Repository
 public interface PizzaRepository extends MongoRepository<PizzaEntity, String> {
-
 }

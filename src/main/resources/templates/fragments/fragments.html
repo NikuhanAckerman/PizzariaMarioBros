@@ -9,7 +9,8 @@
 
     <form th:action="@{/logout}" method="post" style="display: inline;">
         <button type="submit" class="navbar-btn">
-            <i class="bi bi-box-arrow-right"></i> Sair
+            Sair
+            <i class="bi bi-box-arrow-right"></i>
         </button>
     </form>
 
@@ -17,11 +18,10 @@
 
 <th:block th:fragment="controlPanelButton">
 
-    <form th:action="@{/admin}" method="post" style="display: inline;">
-        <button type="submit" class="navbar-btn">
-            <i class="bi bi-box-arrow-right"></i> Painel de controle
-        </button>
-    </form>
+    <a class="navbar-btn" style="padding: 10px" th:href="@{/admin}">
+        Painel de Controle
+        <i class="bi bi-building-fill-gear"></i>
+    </a>
 
 </th:block>
 

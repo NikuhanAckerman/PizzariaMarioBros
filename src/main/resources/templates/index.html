@@ -19,12 +19,7 @@
 
             <h2 style="color: #ffe400" class="header-text" th:text="${'Olá, ' + userName + '!'}"></h2>
 
-            <div class="ms-auto">
-
-                <div th:replace="fragments/fragments :: logoutButton"></div>
-                <div th:if="${canHaveControlPanelButton == true}">
-                    <div th:replace="fragments/fragments :: controlPanelButton"></div>
-                </div>
+            <div class="ms-auto d-flex">
 
                 <button class="navbar-btn" type="button"
                         data-bs-toggle="offcanvas"
@@ -33,6 +28,16 @@
                 >Meu carrinho <i class="bi bi-cart-fill"></i>
                 </button>
 
+                <a th:href="@{/perfil}" class="navbar-btn"> Meu perfil <i class="bi bi-person-circle"> </i> </a>
+
+                <div th:replace="~{fragments/fragments :: logoutButton}"></div>
+
+
+
+            </div>
+
+            <div th:if="${canHaveControlPanelButton == true}">
+                <div th:replace="fragments/fragments :: controlPanelButton"></div>
             </div>
 
         </div>
@@ -54,23 +59,10 @@
                         <h1 th:text="${'R$' + #numbers.formatDecimal(pizza.price, 1, 2, 'COMMA')}"></h1>
                         <p th:text="${pizza.description}"></p>
                         <p th:text="${'Ingredientes: ' + pizza.ingredients}"></p>
-                        <form th:action="@{/cart/addPizza/{cartId}}">
-                            <input type="hidden" name="_method" value="PUT">
-                            <input type="hidden" name="name" th:value="${pizza.name}" />
-                            <input type="hidden" name="description" th:value="${pizza.description}" />
-                            <input type="hidden" name="price" th:value="${pizza.price}" />
-                            <input type="hidden" name="imageUrl" th:value="${pizza.imageUrl}" />
-                            <input type="hidden" name="ingredients" th:value="${pizza.ingredients}" />
-
+                        <form th:action="@{/carrinho/adicionarPizza/{pizzaId}(pizzaId = ${pizza.id})}" method="POST">
                             <label for="pizzaQuantity">Quantidade:</label>
                             <input type="number" id="pizzaQuantity" name="pizzaQuantity" min="1" value="1" max="10">
-                            <button class="btn btn-success" type="button"
-                                    data-bs-toggle="offcanvas"
-                                    data-bs-target="#cartOffcanvas"
-                                    aria-controls="cartOffcanvas"
-                                    >Adicionar ao carrinho <i class="bi bi-cart-plus"></i>
-                            </button>
-
+                            <button class="btn btn-success" type="submit">Adicionar ao carrinho <i class="bi bi-cart-plus"></i></button>
                         </form>
                     </div>
 
@@ -87,10 +79,52 @@
     <div class="offcanvas offcanvas-start" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasRightLabel">Carrinho</h5>
+
+            <form th:action="@{/carrinho/limparCarrinho}" method="POST">
+                <input type="hidden" name="_method" value="DELETE">
+                <button class="btn btn-primary m-1 header-text" type="submit">Limpar carrinho</button>
+            </form>
+
+            <a class="btn btn-success m-1 header-text" th:href="@{/pedido/fazerPedido}">Fazer pedido</a>
+
             <button type="button" class="btn-close" data-bs-dismiss="cartOffcanvas" aria-label="Fechar"></button>
+
+
         </div>
         <div class="offcanvas-body">
-            <h1>Nada por aqui..</h1>
+            <h4 class="text-primary" th:if="${#lists.isEmpty(cartItems)}">Nada por aqui ainda...</h4>
+
+            <div th:each="pizzaInCart : ${cartItems}">
+
+                <div class="card mb-3">
+
+                    <h6 class="header-text card-title text-center" style="font-size: 1.5em" th:text="${pizzaInCart.pizzaName + ' - ' + pizzaInCart.quantityOrdered + 'x'}"></h6>
+                    <img class="align-self-center" th:src="${pizzaInCart.pizzaImageUrl}" style="width: 150px; height: 150px">
+                    <div class="card-body">
+                        <h4 th:text="${'Preço unitário: R$' + #numbers.formatDecimal(pizzaInCart.individualPrice, 1, 2, 'COMMA')}"></h4>
+                        <h4 th:text="${'Preço final: R$' + #numbers.formatDecimal(pizzaInCart.totalPrice, 1, 2, 'COMMA')}"></h4>
+
+                        <div class="d-flex flex-wrap">
+                            <form th:action="@{/carrinho/mudarQuantidadePizza/{pizzaInCartId}(pizzaInCartId = ${pizzaInCart.pizzaInCartId})}" method="POST">
+                                <input type="hidden" name="_method" value="PUT">
+                                <label for="pizzaQuantity">Quantidade:</label>
+                                <input type="number" id="newPizzaQuantity" name="newPizzaQuantity" min="1" value="1" max="10">
+                                <button class="btn btn-success mt-1 header-text" type="submit">Mudar quantidade <i class="bi bi-cart-plus"></i></button>
+                            </form>
+
+                            <form th:action="@{/carrinho/tirarPizza/{pizzaInCartId}(pizzaInCartId = ${pizzaInCart.pizzaInCartId})}" method="POST">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button class="btn btn-danger mt-1 header-text" type="submit">Remover</button>
+                            </form>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
     </div>
 

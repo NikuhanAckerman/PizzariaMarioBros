@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Usuários Cadastrados</title>
+  <link rel="icon" href="/images/pizzariaMarioBros_ICON.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold">Usuários Registrados 👥</h1>
+    <a th:href="@{/admin}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left-circle"></i> Voltar
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover bg-white shadow-sm rounded">
+      <thead class="table-dark text-center">
+      <tr>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Telefone</th>
+        <th>Endereço</th>
+        <th>CPF</th>
+        <th>Cargo</th>
+      </tr>
+      </thead>
+      <tbody th:if="${users}" th:each="user : ${users}">
+      <tr>
+        <td th:text="${user.name}">Nome</td>
+        <td th:text="${user.email}">email@email.com</td>
+        <td th:text="${user.phone}">(00) 00000-0000</td>
+        <td th:text="${user.address}">Endereço completo</td>
+        <td th:text="${user.cpf}">000.000.000-00</td>
+        <td th:text="${user.roles}">ROLE_CLIENT</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center text-muted mt-4" th:if="${#lists.isEmpty(users)}">
+    <h5>Nenhum usuário cadastrado ainda.</h5>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +16,10 @@ public class CartEntity {
     @Id
     private String id;
 
-    List<PizzaInCartEntity> pizzasInCart = new ArrayList<>();
+    private String userId;
 
-    private LocalDateTime timeFirstProductEntered;
+    private List<String> pizzasInCartId = new ArrayList<>();
+
+    private BigDecimal totalPrice;
 
 }

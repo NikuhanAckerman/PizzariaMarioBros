@@ -5,8 +5,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 import pwaula.trabalho.pizzariamario.s.model.CartEntity;
 import pwaula.trabalho.pizzariamario.s.model.UserEntity;
+import pwaula.trabalho.pizzariamario.s.repository.CartRepository;
 import pwaula.trabalho.pizzariamario.s.repository.UserRepository;
 
 @Controller
@@ -16,15 +18,18 @@ public class RegistrationController {
     private UserRepository userRepository;
 
     @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/cadastrar")
-    public void register(@RequestParam String fullName,
-                         @RequestParam String username,
-                         @RequestParam String password,
-                         @RequestParam String phone,
-                         @RequestParam String address,
-                         @RequestParam String cpf){
+    public ModelAndView register(@RequestParam String fullName,
+                                 @RequestParam String username,
+                                 @RequestParam String password,
+                                 @RequestParam String phone,
+                                 @RequestParam String address,
+                                 @RequestParam String cpf){
 
         UserEntity user = new UserEntity();
         user.setName(fullName);
@@ -34,9 +39,14 @@ public class RegistrationController {
         user.setAddress(address);
         user.setCpf(cpf);
         user.setRoles("USER");
-        user.setCart(new CartEntity());
+        CartEntity cart = new CartEntity();
+        cartRepository.save(cart);
+        user.setCartId(cart.getId());
 
         userRepository.save(user);
+
+        ModelAndView mv = new ModelAndView("redirect:/login");
+        return mv;
     }
 
 }

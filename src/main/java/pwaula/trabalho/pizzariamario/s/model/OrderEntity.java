@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Document(collection = "OrderEntity")
@@ -14,8 +15,14 @@ public class OrderEntity {
     @Id
     private String id;
 
-    private UserEntity client;
+    private String userId;
+
+    private String cartId;
 
     private LocalDateTime timeOrderFinished;
+
+    private BigDecimal totalPrice;
+
+    private OrderStatus status;
 
 }

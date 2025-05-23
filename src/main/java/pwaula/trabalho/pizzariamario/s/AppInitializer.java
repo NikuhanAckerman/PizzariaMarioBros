@@ -9,6 +9,7 @@ import org.springframework.web.filter.HiddenHttpMethodFilter;
 import pwaula.trabalho.pizzariamario.s.model.CartEntity;
 import pwaula.trabalho.pizzariamario.s.model.UserEntity;
 import pwaula.trabalho.pizzariamario.s.model.PizzaEntity;
+import pwaula.trabalho.pizzariamario.s.repository.CartRepository;
 import pwaula.trabalho.pizzariamario.s.repository.UserRepository;
 import pwaula.trabalho.pizzariamario.s.repository.PizzaRepository;
 
@@ -29,7 +30,10 @@ public class AppInitializer implements CommandLineRunner {
     private PizzaRepository pizzaRepository;
 
     @Autowired
-    private UserRepository clientRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -87,37 +91,42 @@ public class AppInitializer implements CommandLineRunner {
         }
 
         // Populate clients
-        if (clientRepository.count() == 0) {
+        if (userRepository.count() == 0) {
             System.out.println("Populando tabela de usuários...");
 
-            List<UserEntity> clientList = new ArrayList<>();
+            List<UserEntity> userList = new ArrayList<>();
 
-            UserEntity client1 = new UserEntity();
-            client1.setName("Mario Bros");
-            client1.setEmail("mario@example.com");
-            client1.setPassword(passwordEncoder.encode("senhaDoMarioSuperSegura"));
-            client1.setPhone("11999999999");
-            client1.setAddress("Rua do Cogumelo, 123");
-            client1.setCpf("123.456.789-00");
-            client1.setCart(new CartEntity());  // Or new CartEntity()
-            client1.setRoles("ADMIN");
-            client1.setOrdersDone(new ArrayList<>());
+            UserEntity user1 = new UserEntity();
+            user1.setName("Mario Bros");
+            user1.setEmail("mario@example.com");
+            user1.setPassword(passwordEncoder.encode("123"));
+            user1.setPhone("11999999999");
+            user1.setAddress("Rua do Cogumelo, 123");
+            user1.setCpf("123.456.789-00");
+            CartEntity cart1 = new CartEntity();
+            cart1.setUserId(user1.getId());
+            cartRepository.save(cart1);
+            user1.setCartId(cart1.getId());
+            user1.setRoles("ADMIN");
 
-            UserEntity client2 = new UserEntity();
-            client2.setName("Luigi Bros");
-            client2.setEmail("luigi@example.com");
-            client2.setPassword(passwordEncoder.encode("senhaDoLuigiSuperSegura"));
-            client2.setPhone("11988888888");
-            client2.setAddress("Rua do Toad, 456");
-            client2.setCpf("987.654.321-00");
-            client2.setCart(new CartEntity());
-            client2.setRoles("ADMIN");
-            client2.setOrdersDone(new ArrayList<>());
+            UserEntity user2 = new UserEntity();
+            user2.setName("Luigi Bros");
+            user2.setEmail("luigi@example.com");
+            user2.setPassword(passwordEncoder.encode("123"));
+            user2.setPhone("11988888888");
+            user2.setAddress("Rua do Toad, 456");
+            user2.setCpf("987.654.321-00");
+            CartEntity cart2 = new CartEntity();
+            cart2.setUserId(user2.getId());
+            cartRepository.save(cart2);
+            user2.setCartId(cart2.getId());
+            user2.setRoles("ADMIN");
 
-            clientList.add(client1);
-            clientList.add(client2);
 
-            clientRepository.saveAll(clientList);
+            userList.add(user1);
+            userList.add(user2);
+
+            userRepository.saveAll(userList);
             System.out.println("Tabela de usuários populada.");
         }
 

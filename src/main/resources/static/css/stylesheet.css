@@ -14,12 +14,11 @@ nav {
 }
 
 .header-text {
-    font-family: 'New Super Mario Font U', sans-serif;
+    font-family: 'New Super Mario Font U', sans-serif !important;
+    text-decoration: none;
 }
 
 .navbar-btn {
-
-    height: 35px;
     font-size: 1.2rem;
     font-family: 'New Super Mario Font U', sans-serif;
     color: #ffe400;
@@ -28,6 +27,7 @@ nav {
     border: solid 2px;
     border-color: #ffe400;
     background-color: black;
+    text-decoration: none;
     transition: .25s;
 }
 

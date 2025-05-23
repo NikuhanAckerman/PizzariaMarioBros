@@ -6,9 +6,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-@Document(collection = "ClientEntity")
+@Document(collection = "UserEntity")
 @Getter @Setter
 public class UserEntity {
 
@@ -27,9 +28,9 @@ public class UserEntity {
 
     private String cpf;
 
-    private CartEntity cart;
+    private String cartId;
 
-    private List<OrderEntity> ordersDone = new ArrayList<>();
+    private List<String> ordersDoneId = new ArrayList<>();
 
     private String roles;
 
