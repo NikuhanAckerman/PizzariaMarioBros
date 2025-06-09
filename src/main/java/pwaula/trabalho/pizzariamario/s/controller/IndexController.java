@@ -1,25 +1,19 @@
 package pwaula.trabalho.pizzariamario.s.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
-import pwaula.trabalho.pizzariamario.s.CustomUserDetails;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pwaula.trabalho.pizzariamario.s.dto.OrderDTO;
-import pwaula.trabalho.pizzariamario.s.dto.PizzaDTO;
-import pwaula.trabalho.pizzariamario.s.dto.PizzaInCartDTO;
+import pwaula.trabalho.pizzariamario.s.dto.ProductInCartDTO;
 import pwaula.trabalho.pizzariamario.s.model.*;
 import pwaula.trabalho.pizzariamario.s.repository.CartRepository;
 import pwaula.trabalho.pizzariamario.s.repository.OrderRepository;
-import pwaula.trabalho.pizzariamario.s.repository.PizzaInCartRepository;
-import pwaula.trabalho.pizzariamario.s.repository.PizzaRepository;
+import pwaula.trabalho.pizzariamario.s.repository.ProductInCartRepository;
+import pwaula.trabalho.pizzariamario.s.repository.ProductRepository;
 import pwaula.trabalho.pizzariamario.s.service.UserSessionService;
 
-import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,13 +21,13 @@ import java.util.stream.Collectors;
 public class IndexController {
 
     @Autowired
-    private PizzaRepository pizzaRepository;
+    private ProductRepository productRepository;
 
     @Autowired
     private CartRepository cartRepository;
 
     @Autowired
-    private PizzaInCartRepository pizzaInCartRepository;
+    private ProductInCartRepository productInCartRepository;
 
     @Autowired
     private UserSessionService userSessionService;
@@ -44,38 +38,53 @@ public class IndexController {
     @GetMapping({"/index", "/"})
     public ModelAndView index() {
 
-        List<PizzaEntity> listOfPizzas = pizzaRepository.findAll();
+        List<ProductEntity> listOfPizzas = productRepository.findProductEntitiesByProductCategory(ProductCategory.PIZZAS);
+        List<ProductEntity> listOfEsfihas = productRepository.findProductEntitiesByProductCategory(ProductCategory.ESFIHAS);
+        List<ProductEntity> listOfBebidas = productRepository.findProductEntitiesByProductCategory(ProductCategory.BEBIDAS);
+        List<ProductEntity> listOfAdicionais = productRepository.findProductEntitiesByProductCategory(ProductCategory.ADICIONAIS);
 
         ModelAndView mv = new ModelAndView("index");
 
-        if(userSessionService.getUserEntity().getRoles().equals("ADMIN")) {
-            mv.addObject("canHaveControlPanelButton", true);
-        } else {
-            mv.addObject("canHaveControlPanelButton", false);
-        }
 
         UserEntity user = userSessionService.getUserEntity();
-        CartEntity cart = cartRepository.findById(user.getCartId()).get();
 
-        List<PizzaInCartEntity> pizzasInCart = pizzaInCartRepository.findAllById(cart.getPizzasInCartId());
+        boolean canHaveControlPanelButton = user.getRoles().equals("ADMIN");
+        boolean canHaveAtendenteUI = user.getRoles().equals("ATENDENTE");
+        boolean canHaveClientUI = user.getRoles().equals("USER");
 
-        List<PizzaInCartDTO> cartItems = pizzasInCart.stream()
-                .map(item -> new PizzaInCartDTO(
-                        item.getId(),
-                        pizzaRepository.findById(item.getPizzaId()).get().getName(),
-                        pizzaRepository.findById(item.getPizzaId()).get().getImageUrl(),
-                        item.getIndividualPrice(),
-                        item.getTotalPrice(),
-                        item.getQuantityOrdered()
-                ))
-                .collect(Collectors.toList());
+        mv.addObject("canHaveControlPanelButton", canHaveControlPanelButton);
+        mv.addObject("canHaveAtendenteUI", canHaveAtendenteUI);
+        mv.addObject("canHaveClientUI", canHaveClientUI);
 
-        System.out.println(cartItems);
+        ClientEntity client = userSessionService.getClientEntity();
+
+        if(client != null) {
+            CartEntity cart = cartRepository.findById(client.getCartId()).get();
+
+            List<ProductInCartEntity> productsInCart = productInCartRepository.findAllById(cart.getProductsInCartId());
+
+            List<ProductInCartDTO> cartItems = productsInCart.stream()
+                    .map(item -> new ProductInCartDTO(
+                            item.getId(),
+                            productRepository.findById(item.getProductId()).get().getName(),
+                            productRepository.findById(item.getProductId()).get().getImageUrl(),
+                            item.getIndividualPrice(),
+                            item.getTotalPrice(),
+                            item.getQuantityOrdered()
+                    ))
+                    .collect(Collectors.toList());
+
+            System.out.println(cartItems);
+
+            mv.addObject("userCart", cart);
+            mv.addObject("cartItems", cartItems);
+            mv.addObject("userName", client.getName());
+        }
 
         mv.addObject("pizzas", listOfPizzas);
-        mv.addObject("userCart", cart);
-        mv.addObject("cartItems", cartItems);
-        mv.addObject("userName", userSessionService.getUserEntity().getName());
+        mv.addObject("esfihas", listOfEsfihas);
+        mv.addObject("bebidas", listOfBebidas);
+        mv.addObject("adicionais", listOfAdicionais);
 
         return mv;
     }
@@ -98,33 +107,48 @@ public class IndexController {
         return mv;
     }
 
+    @GetMapping("/404")
+    public ModelAndView notFound() {
+        ModelAndView mv = new ModelAndView("404");
+        return mv;
+    }
+
+    @GetMapping("/405")
+    public ModelAndView notAllowed() {
+        ModelAndView mv = new ModelAndView("405");
+        return mv;
+    }
+
     @GetMapping("/perfil")
     public ModelAndView profile() {
-        UserEntity user = userSessionService.getUserEntity();
+        ClientEntity client = userSessionService.getClientEntity();
 
-        List<OrderEntity> listOfUserOrders = orderRepository.findAllById(user.getOrdersDoneId());
+        ModelAndView mv = new ModelAndView();
 
-        List<OrderDTO> listOfUserOrdersDTO = listOfUserOrders.stream().map(order -> new OrderDTO(
-                order.getUserId(),
+        List<OrderEntity> listOfClientOrders = orderRepository.findAllById(client.getOrdersDoneId());
+
+        List<OrderDTO> listOfUserOrdersDTO = listOfClientOrders.stream().map(order -> new OrderDTO(
+                order.getClientId(),
                 order.getId(),
                 order.getStatus(),
                 order.getTimeOrderFinished(),
                 order.getTotalPrice(),
-                cartRepository.findById(order.getCartId()).get().getPizzasInCartId().stream().map(pizzaInCartIds -> new PizzaInCartDTO(
-                        pizzaInCartIds,
-                        pizzaRepository.findById(pizzaInCartRepository.findById(pizzaInCartIds).get().getPizzaId()).get().getName(),
-                        pizzaRepository.findById(pizzaInCartRepository.findById(pizzaInCartIds).get().getPizzaId()).get().getImageUrl(),
-                        pizzaInCartRepository.findById(pizzaInCartIds).get().getIndividualPrice(),
-                        pizzaInCartRepository.findById(pizzaInCartIds).get().getTotalPrice(),
-                        pizzaInCartRepository.findById(pizzaInCartIds).get().getQuantityOrdered()
+                cartRepository.findById(order.getCartId()).get().getProductsInCartId().stream().map(productInCartIds -> new ProductInCartDTO(
+                        productInCartIds,
+                        productRepository.findById(productInCartRepository.findById(productInCartIds).get().getProductId()).get().getName(),
+                        productRepository.findById(productInCartRepository.findById(productInCartIds).get().getProductId()).get().getImageUrl(),
+                        productInCartRepository.findById(productInCartIds).get().getIndividualPrice(),
+                        productInCartRepository.findById(productInCartIds).get().getTotalPrice(),
+                        productInCartRepository.findById(productInCartIds).get().getQuantityOrdered()
                 )).toList()
         )).toList();
 
         System.out.println(listOfUserOrdersDTO);
 
-        ModelAndView mv = new ModelAndView("profile");
-        mv.addObject("user", user);
+        mv.setViewName("profile");
+        mv.addObject("user", client);
         mv.addObject("orders", listOfUserOrdersDTO);
+
 
         return mv;
     }

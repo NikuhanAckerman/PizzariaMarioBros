@@ -2,22 +2,19 @@ package pwaula.trabalho.pizzariamario.s.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pwaula.trabalho.pizzariamario.s.repository.PizzaRepository;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
-@Document(collection = "PizzaInCartEntity")
+@Document(collection = "ProductInCartEntity")
 @Getter @Setter
-public class PizzaInCartEntity {
+public class ProductInCartEntity {
 
     @Id
     private String id;
 
-    private String pizzaId;
+    private String productId;
 
     private String cartId;
 

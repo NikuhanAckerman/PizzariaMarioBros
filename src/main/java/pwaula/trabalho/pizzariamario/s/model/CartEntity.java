@@ -16,9 +16,9 @@ public class CartEntity {
     @Id
     private String id;
 
-    private String userId;
+    private String clientId;
 
-    private List<String> pizzasInCartId = new ArrayList<>();
+    private List<String> productsInCartId = new ArrayList<>();
 
     private BigDecimal totalPrice;
 

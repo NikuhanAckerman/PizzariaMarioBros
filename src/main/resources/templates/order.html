@@ -54,18 +54,18 @@
       </div>
       <div class="card-body">
 
-        <div th:if="${#lists.isEmpty(pizzasInCart)}">
+        <div th:if="${#lists.isEmpty(productsInCart)}">
           <p class="text-center text-muted">Seu carrinho está vazio.</p>
         </div>
 
-        <div th:each="pizzaInCart : ${pizzasInCart}" class="d-flex align-items-center border-bottom pb-3 mb-3">
-          <img th:src="${pizzaInCart.pizzaImageUrl}" class="pizza-img" alt="Pizza">
+        <div th:each="productInCart : ${productsInCart}" class="d-flex align-items-center border-bottom pb-3 mb-3">
+          <img th:src="${productInCart.productImageUrl}" class="pizza-img" alt="Pizza">
           <div>
-            <h5 th:text="${pizzaInCart.pizzaName}"></h5>
+            <h5 th:text="${productInCart.productName}"></h5>
             <p>
-              Quantidade: <span th:text="${pizzaInCart.quantityOrdered}"></span><br>
-              Preço unitário: R$<span th:text="${#numbers.formatDecimal(pizzaInCart.individualPrice, 1, 2, 'COMMA')}"></span><br>
-              <strong>Total: R$<span th:text="${#numbers.formatDecimal(pizzaInCart.totalPrice, 1, 2, 'COMMA')}"></span></strong>
+              Quantidade: <span th:text="${productInCart.quantityOrdered}"></span><br>
+              Preço unitário: R$<span th:text="${#numbers.formatDecimal(productInCart.individualPrice, 1, 2, 'COMMA')}"></span><br>
+              <strong>Total: R$<span th:text="${#numbers.formatDecimal(productInCart.totalPrice, 1, 2, 'COMMA')}"></span></strong>
             </p>
           </div>
         </div>

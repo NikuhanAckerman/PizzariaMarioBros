@@ -7,16 +7,15 @@ import pwaula.trabalho.pizzariamario.s.model.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter @Setter
 @AllArgsConstructor
 public class OrderDTO {
-    private String userId;
+    private String clientId;
     private String orderId;
     private OrderStatus status;
     private LocalDateTime createdAt;
     private BigDecimal cartTotalPrice;
-    List<PizzaInCartDTO> pizzasInOrder;
+    List<ProductInCartDTO> productsInOrder;
 }

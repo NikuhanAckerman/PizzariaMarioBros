@@ -2,12 +2,10 @@ package pwaula.trabalho.pizzariamario.s.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.ModelAndView;
 import pwaula.trabalho.pizzariamario.s.model.CartEntity;
-import pwaula.trabalho.pizzariamario.s.model.PizzaInCartEntity;
-import pwaula.trabalho.pizzariamario.s.model.UserEntity;
+import pwaula.trabalho.pizzariamario.s.model.ProductInCartEntity;
 import pwaula.trabalho.pizzariamario.s.repository.CartRepository;
-import pwaula.trabalho.pizzariamario.s.repository.PizzaInCartRepository;
+import pwaula.trabalho.pizzariamario.s.repository.ProductInCartRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,13 +17,13 @@ public class CartService {
     private CartRepository cartRepository;
 
     @Autowired
-    private PizzaInCartRepository pizzaInCartRepository;
+    private ProductInCartRepository productInCartRepository;
 
-    public void setCartTotal(CartEntity cart, List<PizzaInCartEntity> cartItems) {
+    public void setCartTotal(CartEntity cart, List<ProductInCartEntity> cartItems) {
         BigDecimal total = new BigDecimal(0);
 
         total = cartItems.stream()
-                .map(PizzaInCartEntity::getTotalPrice)
+                .map(ProductInCartEntity::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         cart.setTotalPrice(total);
@@ -37,9 +35,9 @@ public class CartService {
 
     public void clearCart(CartEntity cart) {
 
-        if(!cart.getPizzasInCartId().isEmpty()) {
-            cart.getPizzasInCartId().clear();
-            pizzaInCartRepository.deleteAll(pizzaInCartRepository.getPizzaInCartEntitiesByCartId(cart.getId()));
+        if(!cart.getProductsInCartId().isEmpty()) {
+            cart.getProductsInCartId().clear();
+            productInCartRepository.deleteAll(productInCartRepository.getProductInCartEntitiesByCartId(cart.getId()));
             setCartTotal(cart, BigDecimal.valueOf(0));
             cartRepository.save(cart);
         }

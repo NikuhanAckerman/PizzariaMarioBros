@@ -38,12 +38,16 @@
   <h2 class="dashboard-title">Pedidos e Vendas</h2>
 
   <div class="d-grid gap-3">
-    <a th:href="@{/admin/vendas/delivery}" class="btn btn-outline-primary btn-dashboard">
+    <a th:href="@{/atendente/vendas/delivery}" class="btn btn-outline-primary btn-dashboard">
       <i class="  bi-card-checklist"></i></i> Pedidos via Delivery
     </a>
 
-    <a th:href="@{/admin/vendas/local}" class="btn btn-outline-success btn-dashboard">
+    <a th:href="@{/atendente/vendas/local}" class="btn btn-outline-success btn-dashboard">
       <i class="bi bi-fork-knife"></i> Pedidos no local
+    </a>
+
+    <a th:href="@{/}" class="btn btn-outline-dark btn-dashboard">
+      <i class="bi bi-house"></i></i> Voltar para a home
     </a>
   </div>
 

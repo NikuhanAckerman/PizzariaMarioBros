@@ -44,9 +44,9 @@
 
           <h6>Pizzas:</h6>
           <div class="d-flex flex-wrap text-center">
-            <li  style="padding: 10px; gap: 5px; border: solid 2px black; border-radius: 20px" class="me-5 mb-3" th:each="item : ${order.pizzasInOrder}">
-              <img class="text-center" th:src="${item.pizzaImageUrl}" style="width: 150px; height: 150px;">
-              <h5 th:text="${item.pizzaName}"></h5>
+            <li  style="padding: 10px; gap: 5px; border: solid 2px black; border-radius: 20px" class="me-5 mb-3" th:each="item : ${order.productsInOrder}">
+              <img class="text-center" th:src="${item.productImageUrl}" style="width: 150px; height: 150px;">
+              <h5 th:text="${item.productName}"></h5>
               <span th:text="${'Preço unitário: R$' + #numbers.formatDecimal(item.individualPrice, 1, 2, 'COMMA') + ' - '}"></span>
 
               <span th:text="'Quantidade: ' + ${item.quantityOrdered}"></span>

@@ -1,18 +1,17 @@
 package pwaula.trabalho.pizzariamario.s.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import pwaula.trabalho.pizzariamario.s.dto.*;
 import pwaula.trabalho.pizzariamario.s.model.*;
 import pwaula.trabalho.pizzariamario.s.repository.*;
-import pwaula.trabalho.pizzariamario.s.service.UserSessionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,16 +21,19 @@ import java.util.Map;
 public class AdminController {
 
     @Autowired
-    private PizzaRepository pizzaRepository;
+    private ProductRepository productRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
-    private PizzaInCartRepository pizzaInCartRepository;
+    private ProductInCartRepository productInCartRepository;
 
     @Autowired
     private CartRepository cartRepository;
@@ -40,321 +42,189 @@ public class AdminController {
     private LocalOrderRepository localOrderRepository;
 
     @Autowired
-    private LocalPizzaOrderedRepository localPizzaOrderedRepository;
+    private LocalProductOrderedRepository localProductOrderedRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @GetMapping("")
     public ModelAndView controlPanel() {
         return new ModelAndView("controlpanel");
     }
 
-    @GetMapping("/pizzas")
-    public ModelAndView controlPanelPizza() {
-        ModelAndView mv = new ModelAndView("pizzaPanel");
-        mv.addObject("pizzas", pizzaRepository.findAll());
+    @GetMapping("/produtos")
+    public ModelAndView controlPanelProducts() {
+        ModelAndView mv = new ModelAndView("productsPanel");
+        mv.addObject("products", productRepository.findAll());
         return mv;
     }
 
-    @GetMapping("/pizzas/criarPizza")
-    public ModelAndView createNewPizza() {
-        ModelAndView mv = new ModelAndView("createPizza");
-        mv.addObject("pizzaDTO", new PizzaDTO());
+    @GetMapping("/produtos/criarProduto")
+    public ModelAndView createNewProduct() {
+        ModelAndView mv = new ModelAndView("createProduct");
+        mv.addObject("productDTO", new ProductDTO());
         return mv;
     }
 
-    @PostMapping("pizzas/criarPizza")
-    public ModelAndView createNewPizzaPost(@ModelAttribute PizzaDTO pizzaDTO) {
-        PizzaEntity pizza = new PizzaEntity(pizzaDTO.getName(),
-                                            pizzaDTO.getDescription(),
-                                            pizzaDTO.getPrice(),
-                                            pizzaDTO.getImageUrl(),
-                                            pizzaDTO.getIngredients());
-        pizzaRepository.save(pizza);
-        ModelAndView mv = new ModelAndView("redirect:/admin/pizzas");
+    @PostMapping("/produtos/criarProduto")
+    public ModelAndView createNewProductPost(@ModelAttribute ProductDTO productDTO) {
+        ProductEntity product = new ProductEntity(productDTO.getName(),
+                productDTO.getDescription(),
+                productDTO.getPrice(),
+                productDTO.getImageUrl(),
+                ProductCategory.valueOf(productDTO.getCategory()),
+                productDTO.isAvailableForProduction());
+        productRepository.save(product);
+        ModelAndView mv = new ModelAndView("redirect:/admin/produtos");
         return mv;
     }
 
-    @GetMapping("/pizzas/editarPizza/{pizzaId}")
-    public ModelAndView editPizza(@PathVariable String pizzaId) {
-        PizzaEntity pizza = pizzaRepository.findById(pizzaId).get();
+    @GetMapping("/produtos/editarProduto/{productId}")
+    public ModelAndView editProduct(@PathVariable String productId) {
+        ProductEntity product = productRepository.findById(productId).get();
 
-        ModelAndView mv = new ModelAndView("updatePizza");
-        mv.addObject("pizza", pizza);
+        ModelAndView mv = new ModelAndView("updateProduct");
+        mv.addObject("product", product);
         return mv;
     }
 
-    @PutMapping("/pizzas/editarPizza/{pizzaId}")
-    public ModelAndView editPizzaPut(@PathVariable String pizzaId, @ModelAttribute PizzaDTO pizzaDTO) {
-        PizzaEntity pizza = pizzaRepository.findById(pizzaId).get();
-        pizza.setName(pizzaDTO.getName());
-        pizza.setDescription(pizzaDTO.getDescription());
-        pizza.setPrice(pizzaDTO.getPrice());
-        pizza.setImageUrl(pizzaDTO.getImageUrl());
-        pizza.setIngredients(pizzaDTO.getIngredients());
-        pizzaRepository.save(pizza);
-        ModelAndView mv = new ModelAndView("redirect:/admin/pizzas");
+    @PutMapping("/produtos/editarProduto/{productId}")
+    public ModelAndView editProductPut(@PathVariable String productId, @ModelAttribute ProductDTO productDTO) {
+        ProductEntity product = productRepository.findById(productId).get();
+        product.setName(productDTO.getName());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setImageUrl(productDTO.getImageUrl());
+        product.setProductCategory(ProductCategory.valueOf(productDTO.getCategory()));
+        product.setAvailableForProduction(productDTO.isAvailableForProduction());
+
+        productRepository.save(product);
+        ModelAndView mv = new ModelAndView("redirect:/admin/produtos");
         return mv;
     }
 
-    @DeleteMapping("/pizzas/deletarPizza/{pizzaId}")
-    public ModelAndView deletePizza(@PathVariable String pizzaId) {
-        PizzaEntity pizza = pizzaRepository.findById(pizzaId).get();
-        pizzaRepository.delete(pizza);
-        return new ModelAndView("redirect:/admin/pizzas");
+    @DeleteMapping("/produtos/deletarProduto/{productId}")
+    public ModelAndView deleteProduct(@PathVariable String productId) {
+        ProductEntity product = productRepository.findById(productId).get();
+        productRepository.delete(product);
+        return new ModelAndView("redirect:/admin/produtos");
     }
 
-    @GetMapping("/clientes")
+    @GetMapping("/usuarios")
     public ModelAndView controlPanelUsers() {
         ModelAndView mv = new ModelAndView("usersPanel");
-        mv.addObject("users", userRepository.findAll());
+
+        List<UserEntity> clientes = userRepository.findAll().stream().filter(userEntity -> userEntity.getRoles().equals("USER")).toList();
+        List<UserEntity> admins = userRepository.findAll().stream().filter(userEntity -> userEntity.getRoles().equals("ADMIN")).toList();
+        List<UserEntity> atendentes = userRepository.findAll().stream().filter(userEntity -> userEntity.getRoles().equals("ATENDENTE")).toList();
+
+        List<ClientDTO> listOfClientDTOs = new ArrayList<>(clientes.stream().map(clientEntity -> new ClientDTO(
+                clientEntity.getId(),
+                clientRepository.findClientEntityByUserId(clientEntity.getId()).getName(),
+                clientRepository.findClientEntityByUserId(clientEntity.getId()).getEmail(),
+                clientRepository.findClientEntityByUserId(clientEntity.getId()).getPhone(),
+                clientRepository.findClientEntityByUserId(clientEntity.getId()).getAddress(),
+                clientRepository.findClientEntityByUserId(clientEntity.getId()).getCpf()
+        )).toList());
+
+        mv.addObject("clientes", listOfClientDTOs);
+        mv.addObject("admins", admins);
+        mv.addObject("atendentes", atendentes);
         return mv;
     }
 
-    @GetMapping("/vendas")
-    public ModelAndView controlPanelSales() {
-        ModelAndView mv = new ModelAndView("salesControlPanel");
-
+    @GetMapping("/usuarios/adicionarAtendente")
+    public ModelAndView controlPanelUsersAddAttendant() {
+        ModelAndView mv = new ModelAndView("createAttendant");
+        mv.addObject("userDTO", new UserDTO());
         return mv;
     }
 
-    @GetMapping("/vendas/delivery")
-    public ModelAndView deliveryOrders() {
-        ModelAndView mv = new ModelAndView("deliveryOrdersPanel");
+    @PostMapping("/usuarios/adicionarAtendente")
+    public ModelAndView controlPanelUsersAddAttendantPost(@ModelAttribute UserDTO userDTO) {
+        UserEntity user = new UserEntity();
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRoles("ATENDENTE");
+        userRepository.save(user);
 
+        return new ModelAndView("redirect:/admin/usuarios");
+    }
 
-        List<OrderEntity> listOfOrders = orderRepository.findAll();
+    @DeleteMapping("/usuarios/deletarAtendente/{attendantId}")
+    public ModelAndView controlPanelUsersDeleteAttendant(@PathVariable String attendantId) {
+        UserEntity user = userRepository.findById(attendantId).get();
+        userRepository.delete(user);
+        return new ModelAndView("redirect:/admin/usuarios");
+    }
 
-        List<OrderDTO> listOfOrdersDTO = listOfOrders.stream().map(order -> new OrderDTO(
-                order.getUserId(),
-                order.getId(),
-                order.getStatus(),
-                order.getTimeOrderFinished(),
-                order.getTotalPrice(),
-                cartRepository.findById(order.getCartId()).get().getPizzasInCartId().stream().map(pizzaInCartIds -> new PizzaInCartDTO(
-                        pizzaInCartIds,
-                        pizzaRepository.findById(pizzaInCartRepository.findById(pizzaInCartIds).get().getPizzaId()).get().getName(),
-                        pizzaRepository.findById(pizzaInCartRepository.findById(pizzaInCartIds).get().getPizzaId()).get().getImageUrl(),
-                        pizzaInCartRepository.findById(pizzaInCartIds).get().getIndividualPrice(),
-                        pizzaInCartRepository.findById(pizzaInCartIds).get().getTotalPrice(),
-                        pizzaInCartRepository.findById(pizzaInCartIds).get().getQuantityOrdered()
-                )).toList()
-        )).toList();
-
-        List<OrderInDeliveryOrderPanelDTO> listOfOrderInDeliveryOrdersPanelDTO = new ArrayList<>();
-
-        for(OrderDTO orderDTO : listOfOrdersDTO) {
-
-            OrderInDeliveryOrderPanelDTO orderInDeliveryOrderPanelDTO = new OrderInDeliveryOrderPanelDTO(
-                    orderDTO.getUserId(),
-                    orderDTO.getOrderId(),
-                    userRepository.findById(orderDTO.getUserId()).get().getName(),
-                    userRepository.findById(orderDTO.getUserId()).get().getAddress(),
-                    userRepository.findById(orderDTO.getUserId()).get().getPhone(),
-                    userRepository.findById(orderDTO.getUserId()).get().getEmail(),
-                    orderDTO
-            );
-
-            listOfOrderInDeliveryOrdersPanelDTO.add(orderInDeliveryOrderPanelDTO);
-
-        }
-
-        mv.addObject("orders", listOfOrderInDeliveryOrdersPanelDTO);
-
+    @GetMapping("/usuarios/atualizarAtendente/{attendantId}")
+    public ModelAndView controlPanelUsersUpdateAttendant(@PathVariable String attendantId) {
+        ModelAndView mv = new ModelAndView("updateAttendant");
+        UserEntity atendente = userRepository.findById(attendantId).get();
+        UserDTO atendenteDTO = new UserDTO();
+        atendenteDTO.setId(atendente.getId());
+        atendenteDTO.setEmail(atendente.getEmail());
+        mv.addObject("atendente", atendenteDTO);
         return mv;
     }
 
-    @PutMapping("/vendas/delivery/mudarStatus/{orderId}")
-    public ModelAndView deliveryMudarStatus(@PathVariable String orderId, @RequestParam int status) {
-        OrderEntity order = orderRepository.findById(orderId).get();
+    @PutMapping("/usuarios/atualizarAtendente/{attendantId}")
+    public ModelAndView controlPanelUsersAddAttendantPut(@PathVariable String attendantId, @ModelAttribute UserDTO atendenteDTO) {
+        UserEntity atendente = userRepository.findById(attendantId).get();
+        atendente.setEmail(atendenteDTO.getEmail());
+        atendente.setPassword(passwordEncoder.encode(atendenteDTO.getPassword()));
+        atendente.setRoles("ATENDENTE");
+        userRepository.save(atendente);
 
-        switch (status) {
-            case 1 -> order.setStatus(OrderStatus.PEDIDO_RECEBIDO);
-            case 2 -> order.setStatus(OrderStatus.PIZZA_SENDO_FEITA);
-            case 3 -> order.setStatus(OrderStatus.DELIVERY_A_CAMINHO);
-            case 4 -> order.setStatus(OrderStatus.DELIVERY_CONCLUIDO);
-            case 5 -> order.setStatus(OrderStatus.DELIVERY_CANCELADO);
-            default -> {
-                return new ModelAndView("redirect:/admin/vendas/delivery");
-            }
-        }
-
-        orderRepository.save(order);
-
-        return new ModelAndView("redirect:/admin/vendas/delivery");
+        return new ModelAndView("redirect:/admin/usuarios");
     }
 
-    @GetMapping("/vendas/local")
-    public ModelAndView localOrders(@RequestParam(defaultValue = "2025-01-01") LocalDate startDate) {
-        LocalDateTime startDateTime = startDate.atStartOfDay();
+    @DeleteMapping("/usuarios/deletarCliente/{clientId}")
+    public ModelAndView controlPanelUsersDeleteClient(@PathVariable String clientId) {
+        UserEntity user = userRepository.findById(clientId).get();
+        userRepository.delete(user);
+        return new ModelAndView("redirect:/admin/usuarios");
+    }
 
-        ModelAndView mv = new ModelAndView("localOrdersPanel");
-
-        List<LocalOrderEntity> listOfLocalOrders = localOrderRepository.findLocalOrderEntitiesByOrderedAtTimeAfter(startDateTime);
-
-        List<LocalOrderDTO> listOfLocalOrderDTOs = listOfLocalOrders.stream().map(localOrder -> new LocalOrderDTO(
-                localOrder.getId(),
-                localPizzaOrderedRepository.findAllById(localOrder.getPizzasOrderedList()).stream().map(localPizzaOrderedEntity -> new LocalPizzaOrderDTO(
-                        localPizzaOrderedEntity.getPizzaId(),
-                        pizzaRepository.findById(localPizzaOrderedEntity.getPizzaId()).get().getName(),
-                        localPizzaOrderedEntity.getQuantityOrdered(),
-                        localPizzaOrderedEntity.getIndividualPrice(),
-                        localPizzaOrderedEntity.getTotalPrice()
-                )).toList(),
-                localOrder.getOrderTable(),
-                localOrder.getOrderedAtTime(),
-                localOrder.getTableFinishedAtTime(),
-                localOrder.getTotalPrice()
-        )).toList();
-
-        mv.addObject("orders", listOfLocalOrderDTOs);
-
+    @GetMapping("/usuarios/atualizarCliente/{clientId}")
+    public ModelAndView controlPanelUsersUpdateClient(@PathVariable String clientId) {
+        ModelAndView mv = new ModelAndView("updateClient");
+        ClientEntity cliente = clientRepository.findClientEntityByUserId(clientId);
+        ClientUpdateDTO clientUpdateDTO = new ClientUpdateDTO();
+        clientUpdateDTO.setUserId(clientId);
+        clientUpdateDTO.setPhone(cliente.getPhone());
+        clientUpdateDTO.setEmail(cliente.getEmail());
+        clientUpdateDTO.setAddress(cliente.getAddress());
+        clientUpdateDTO.setCpf(cliente.getCpf());
+        clientUpdateDTO.setName(cliente.getName());
+        mv.addObject("cliente", clientUpdateDTO);
         return mv;
     }
 
-    @GetMapping("/vendas/local/criarPedidoLocal")
-    public ModelAndView localOrdersCriarPedido() {
-        ModelAndView mv = new ModelAndView("createLocalOrder");
+    @PutMapping("/usuarios/atualizarCliente/{clientId}")
+    public ModelAndView controlPanelUsersAddClientPut(@PathVariable String clientId, @ModelAttribute ClientUpdateDTO clientUpdateDTO) {
+        UserEntity clienteUserEntity = userRepository.findById(clientId).get();
+        ClientEntity cliente = clientRepository.findClientEntityByUserId(clientId);
 
-        List<PizzaEntity> pizzas = pizzaRepository.findAll();
-        mv.addObject("pizzas", pizzas);
+        System.out.println(clienteUserEntity.getEmail());
+        System.out.println(cliente.getName());
 
-        return mv;
+        cliente.setPhone(clientUpdateDTO.getPhone());
+        cliente.setEmail(clientUpdateDTO.getEmail());
+        cliente.setAddress(clientUpdateDTO.getAddress());
+        cliente.setCpf(clientUpdateDTO.getCpf());
+        cliente.setName(clientUpdateDTO.getName());
+        clienteUserEntity.setEmail(clientUpdateDTO.getEmail());
+        clienteUserEntity.setPassword(passwordEncoder.encode(clientUpdateDTO.getPassword()));
+
+        userRepository.save(clienteUserEntity);
+        clientRepository.save(cliente);
+
+        return new ModelAndView("redirect:/admin/usuarios");
     }
 
-    @PostMapping("/vendas/local/criarPedidoLocal")
-    public ModelAndView criarPedidoLocal(@RequestParam int mesa, @RequestParam Map<String, String> params) {
 
-        LocalOrderEntity localOrderEntity = new LocalOrderEntity();
-
-        // Set mesa
-        localOrderEntity.setOrderTable(LocalOrderTable.valueOf("MESA_" + mesa));
-
-        // Remove "mesa" from params so only pizza data remains
-        params.remove("mesa");
-
-        localOrderEntity.setOrderedAtTime(LocalDateTime.now());
-        localOrderEntity.setTableFinishedAtTime(null);
-
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            String pizzaId = entry.getKey();
-            int quantity = Integer.parseInt(entry.getValue());
-
-            if (quantity > 0) {
-                PizzaEntity pizza = pizzaRepository.findById(pizzaId).orElse(null);
-                if (pizza == null) continue;
-
-                LocalPizzaOrderedEntity ordered = new LocalPizzaOrderedEntity();
-                ordered.setPizzaId(pizzaId);
-                ordered.setQuantityOrdered(quantity);
-                ordered.setIndividualPrice(pizza.getPrice());
-                ordered.setTotalPrice(pizza.getPrice().multiply(BigDecimal.valueOf(quantity)));
-                ordered.setLocalOrderId(localOrderEntity.getId());
-
-                localPizzaOrderedRepository.save(ordered);
-                localOrderEntity.getPizzasOrderedList().add(ordered.getId());
-            }
-        }
-
-        List<BigDecimal> localPizzasOrderedTotalPrices = localOrderEntity.getPizzasOrderedList().stream()
-                .map(localPizzaOrderedEntity -> localPizzaOrderedRepository.findById(localPizzaOrderedEntity).get().getTotalPrice()).toList();
-
-        localOrderEntity.setTotalPrice(localPizzasOrderedTotalPrices.stream().reduce(BigDecimal.ZERO, BigDecimal::add));
-
-        localOrderRepository.save(localOrderEntity);
-
-        return new ModelAndView("redirect:/admin/vendas/local");
-    }
-
-    @GetMapping("/vendas/local/atualizarPedidoLocal/{localOrderId}")
-    public ModelAndView localOrdersAtualizarPedido(@PathVariable String localOrderId) {
-        ModelAndView mv = new ModelAndView("updateLocalOrder");
-
-        LocalOrderEntity localOrderEntity = localOrderRepository.findById(localOrderId).get();
-
-        LocalOrderDTO newLocalOrderDTO = new LocalOrderDTO(
-                localOrderEntity.getId(),
-                localPizzaOrderedRepository.findAllById(localOrderEntity.getPizzasOrderedList()).stream()
-                        .map(localPizzaOrderedEntity -> new LocalPizzaOrderDTO(
-                                localPizzaOrderedEntity.getPizzaId(),
-                                pizzaRepository.findById(localPizzaOrderedEntity.getPizzaId()).get().getName(),
-                                localPizzaOrderedEntity.getQuantityOrdered(),
-                                localPizzaOrderedEntity.getIndividualPrice(),
-                                localPizzaOrderedEntity.getTotalPrice()
-                        )).toList(),
-                localOrderEntity.getOrderTable(),
-                localOrderEntity.getOrderedAtTime(),
-                localOrderEntity.getTableFinishedAtTime(),
-                localOrderEntity.getTotalPrice()
-        );
-
-        List<PizzaEntity> pizzas = pizzaRepository.findAll();
-        mv.addObject("pizzas", pizzas);
-        mv.addObject("newLocalOrderDTO", newLocalOrderDTO);
-        return mv;
-    }
-
-    @PutMapping("/vendas/local/atualizarPedidoLocal/{localOrderId}")
-    public ModelAndView atualizarPedidoLocalmente(@PathVariable String localOrderId, @RequestParam int mesa, @RequestParam Map<String, String> params) {
-        LocalOrderEntity localOrderEntity = localOrderRepository.findById(localOrderId).get();
-        localOrderEntity.setPizzasOrderedList(new ArrayList<>());
-
-        // Set mesa
-        localOrderEntity.setOrderTable(LocalOrderTable.valueOf("MESA_" + mesa));
-
-        // Remove "mesa" from params so only pizza data remains
-        params.remove("mesa");
-        params.remove("_method");
-
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            String pizzaId = entry.getKey();
-            int quantity = Integer.parseInt(entry.getValue());
-
-            if (quantity > 0) {
-                PizzaEntity pizza = pizzaRepository.findById(pizzaId).orElse(null);
-                if (pizza == null) continue;
-
-                LocalPizzaOrderedEntity ordered = new LocalPizzaOrderedEntity();
-                ordered.setPizzaId(pizzaId);
-                ordered.setQuantityOrdered(quantity);
-                ordered.setIndividualPrice(pizza.getPrice());
-                ordered.setTotalPrice(pizza.getPrice().multiply(BigDecimal.valueOf(quantity)));
-                ordered.setLocalOrderId(localOrderEntity.getId());
-
-                localPizzaOrderedRepository.save(ordered);
-                localOrderEntity.getPizzasOrderedList().add(ordered.getId());
-            }
-        }
-
-        List<BigDecimal> localPizzasOrderedTotalPrices = localOrderEntity.getPizzasOrderedList().stream()
-                .map(localPizzaOrderedEntity -> localPizzaOrderedRepository.findById(localPizzaOrderedEntity).get().getTotalPrice()).toList();
-
-        localOrderEntity.setTotalPrice(localPizzasOrderedTotalPrices.stream().reduce(BigDecimal.ZERO, BigDecimal::add));
-
-        localOrderRepository.save(localOrderEntity);
-
-        return new ModelAndView("redirect:/admin/vendas/local");
-    }
-
-    @PutMapping("/vendas/local/terminarPedidoLocal/{localOrderId}")
-    public ModelAndView localOrdersTerminarPedido(@PathVariable String localOrderId) {
-
-        LocalOrderEntity localOrder = localOrderRepository.findById(localOrderId).get();
-
-        if(localOrder.getTableFinishedAtTime() != null) { // nao atualizar o termino se ja  acabou o pedido
-            return new ModelAndView("redirect:/admin/vendas/local");
-        }
-
-        localOrder.setTableFinishedAtTime(LocalDateTime.now());
-        localOrderRepository.save(localOrder);
-
-        return new ModelAndView("redirect:/admin/vendas/local");
-    }
-
-    @DeleteMapping("/vendas/local/deletarPedidoLocal/{localOrderId}")
-    public ModelAndView localOrdersDeletarPedido(@PathVariable String localOrderId) {
-        LocalOrderEntity localOrder = localOrderRepository.findById(localOrderId).get();
-        localOrderRepository.delete(localOrder);
-        return new ModelAndView("redirect:/admin/vendas/local");
-    }
 
 
 }

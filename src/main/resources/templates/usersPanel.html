@@ -17,34 +17,95 @@
     </a>
   </div>
 
+
+  <h1 class="fw-bold">Admins</h1>
+
+  <table class="table table-bordered table-hover bg-white shadow-sm rounded">
+    <thead class="table-dark text-center">
+    <tr>
+      <th>Email</th>
+      <th>Cargo</th>
+    </tr>
+    </thead>
+    <tbody th:if="${admins}" th:each="admin : ${admins}">
+    <tr>
+      <td th:text="${admin.email}">email@email.com</td>
+      <td th:text="${admin.roles}">role</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h1 class="fw-bold">Atendentes</h1>
+
+  <a th:href="@{/admin/usuarios/adicionarAtendente}">
+    <button class="btn btn-outline-success mt-2 mb-2">Adicionar atendente</button>
+  </a>
+
+  <table class="table table-bordered table-hover bg-white shadow-sm rounded">
+    <thead class="table-dark text-center">
+    <tr>
+      <th>Email</th>
+      <th>Cargo</th>
+      <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody th:if="${atendentes}" th:each="atendente : ${atendentes}">
+    <tr>
+      <td th:text="${atendente.email}">email@email.com</td>
+      <td th:text="${atendente.roles}">role</td>
+      <td>
+        <a th:href="@{/admin/usuarios/atualizarAtendente/{attendantId}(attendantId = ${atendente.id})}" style="display: inline">
+          <button class="btn btn-outline-primary">Atualizar</button>
+        </a>
+
+        <form th:action="@{/admin/usuarios/deletarAtendente/{attendantId}(attendantId = ${atendente.id})}" style="display: inline" method="POST">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit" class="btn btn-outline-danger">Deletar</button>
+        </form>
+
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h1 class="fw-bold">Clientes</h1>
+
   <div class="table-responsive">
     <table class="table table-bordered table-hover bg-white shadow-sm rounded">
       <thead class="table-dark text-center">
       <tr>
+        <th>ID</th>
         <th>Nome</th>
         <th>Email</th>
         <th>Telefone</th>
         <th>Endereço</th>
         <th>CPF</th>
-        <th>Cargo</th>
+        <th>Ações</th>
       </tr>
       </thead>
-      <tbody th:if="${users}" th:each="user : ${users}">
+      <tbody th:if="${clientes}" th:each="cliente : ${clientes}">
       <tr>
-        <td th:text="${user.name}">Nome</td>
-        <td th:text="${user.email}">email@email.com</td>
-        <td th:text="${user.phone}">(00) 00000-0000</td>
-        <td th:text="${user.address}">Endereço completo</td>
-        <td th:text="${user.cpf}">000.000.000-00</td>
-        <td th:text="${user.roles}">ROLE_CLIENT</td>
+        <td th:text="${cliente.userId}">Id</td>
+        <td th:text="${cliente.name}">Nome</td>
+        <td th:text="${cliente.email}">email@email.com</td>
+        <td th:text="${cliente.phone}">(00) 00000-0000</td>
+        <td th:text="${cliente.address}">Endereço completo</td>
+        <td th:text="${cliente.cpf}">000.000.000-00</td>
+        <td>
+          <a th:href="@{/admin/usuarios/atualizarCliente/{clientId}(clientId = ${cliente.userId})}" style="display: inline">
+            <button class="btn btn-outline-primary">Atualizar</button>
+          </a>
+
+          <form th:action="@{/admin/usuarios/deletarCliente/{clientId}(clientId = ${cliente.userId})}" style="display: inline" method="POST">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn btn-outline-danger">Deletar</button>
+          </form>
+        </td>
       </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="text-center text-muted mt-4" th:if="${#lists.isEmpty(users)}">
-    <h5>Nenhum usuário cadastrado ainda.</h5>
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

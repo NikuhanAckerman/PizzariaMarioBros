@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter @Setter
 @AllArgsConstructor
 public class OrderInDeliveryOrderPanelDTO {
-    private String userOrderedId;
+    private String clientId;
     private String orderId;
     private String userOrderedName;
     private String userOrderedAddress;

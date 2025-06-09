@@ -15,7 +15,7 @@ public class OrderEntity {
     @Id
     private String id;
 
-    private String userId;
+    private String clientId;
 
     private String cartId;
 

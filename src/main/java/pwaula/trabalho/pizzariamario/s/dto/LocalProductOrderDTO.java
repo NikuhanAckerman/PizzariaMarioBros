@@ -8,11 +8,10 @@ import java.math.BigDecimal;
 
 @Getter @Setter
 @AllArgsConstructor
-public class PizzaInCartDTO {
-    private String pizzaInCartId;
-    private String pizzaName;
-    private String pizzaImageUrl;
+public class LocalProductOrderDTO {
+    private String productId;
+    private String productName;
+    private int quantityOrdered;
     private BigDecimal individualPrice;
     private BigDecimal totalPrice;
-    private int quantityOrdered;
 }

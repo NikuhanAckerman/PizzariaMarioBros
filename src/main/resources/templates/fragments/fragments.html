@@ -9,8 +9,7 @@
 
     <form th:action="@{/logout}" method="post" style="display: inline;">
         <button type="submit" class="navbar-btn">
-            Sair
-            <i class="bi bi-box-arrow-right"></i>
+            Sair <i class="bi bi-box-arrow-right"></i>
         </button>
     </form>
 
@@ -18,10 +17,149 @@
 
 <th:block th:fragment="controlPanelButton">
 
-    <a class="navbar-btn" style="padding: 10px" th:href="@{/admin}">
-        Painel de Controle
-        <i class="bi bi-building-fill-gear"></i>
+    <a class="navbar-btn" style="padding: 5px" th:href="@{/admin}">
+        Painel de Controle <i class="bi bi-building-fill-gear"></i>
     </a>
+
+</th:block>
+
+<th:block th:fragment="helloClientText">
+
+    <h2 style="color: #ffe400" class="header-text" th:text="${'Olá, ' + userName + '!'}"></h2>
+
+</th:block>
+
+<th:block th:fragment="profileButton">
+
+    <a th:href="@{/perfil}" class="navbar-btn"> Meu perfil <i class="bi bi-person-circle"> </i> </a>
+
+</th:block>
+
+<th:block th:fragment="cartButton">
+
+    <button class="navbar-btn" type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#cartOffcanvas"
+            aria-controls="cartOffcanvas"
+    >Meu carrinho <i class="bi bi-cart-fill"></i>
+    </button>
+
+</th:block>
+
+<th:block th:fragment="ordersButton">
+
+    <a th:href="@{/atendente/vendas}">
+        <button class="navbar-btn" type="button">Pedidos</button>
+    </a>
+
+</th:block>
+
+<th:block th:fragment="cartOffCanvas">
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Carrinho</h5>
+
+            <form th:action="@{/carrinho/limparCarrinho}" method="POST">
+                <input type="hidden" name="_method" value="DELETE">
+                <button class="btn btn-primary m-1 header-text" type="submit">Limpar carrinho</button>
+            </form>
+
+            <a class="btn btn-success m-1 header-text" th:href="@{/pedido/fazerPedido}">Fazer pedido</a>
+
+            <button type="button" class="btn-close" data-bs-dismiss="cartOffcanvas" aria-label="Fechar"></button>
+
+        </div>
+
+        <div class="offcanvas-body">
+            <h4 class="text-primary" th:if="${#lists.isEmpty(cartItems)}">Nada por aqui ainda...</h4>
+
+            <div th:each="productInCart : ${cartItems}">
+
+                <div class="card mb-3">
+
+                    <h6 class="header-text card-title text-center" style="font-size: 1.5em" th:text="${productInCart.productName + ' - ' + productInCart.quantityOrdered + 'x'}"></h6>
+                    <img class="align-self-center" th:src="${productInCart.productImageUrl}" style="width: 150px; height: 150px">
+                    <div class="card-body">
+                        <h4 th:text="${'Preço unitário: R$' + #numbers.formatDecimal(productInCart.individualPrice, 1, 2, 'COMMA')}"></h4>
+                        <h4 th:text="${'Preço final: R$' + #numbers.formatDecimal(productInCart.totalPrice, 1, 2, 'COMMA')}"></h4>
+
+                        <div class="d-flex flex-wrap">
+                            <form th:action="@{/carrinho/mudarQuantidadeProduto/{productInCartId}(productInCartId = ${productInCart.productInCartId})}" method="POST">
+                                <input type="hidden" name="_method" value="PUT">
+                                <label for="newProductQuantity">Quantidade:</label>
+                                <input type="number" id="newProductQuantity" name="newProductQuantity" min="1" value="1">
+                                <button class="btn btn-success mt-1 header-text" type="submit">Mudar quantidade <i class="bi bi-cart-plus"></i></button>
+                            </form>
+
+                            <form th:action="@{/carrinho/tirarProduto/{productInCartId}(productInCartId = ${productInCart.productInCartId})}" method="POST">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button class="btn btn-danger mt-1 header-text" type="submit">Remover</button>
+                            </form>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</th:block>
+
+<th:block th:fragment="productDisplay(products)">
+
+    <div class="card pizza-card" style="height: 400px; width: 400px; margin: 10px" th:each="product : ${products}">
+
+        <h2 class="header-text card-title" style="background-color: #ffe400" th:text="${product.name}"></h2>
+        <div class="card-body" style="overflow: auto">
+            <div th:if="${product.availableForProduction == false}">
+                <h2 class="header-text bg-danger">PRODUTO INDISPONÍVEL</h2>
+            </div>
+            <img th:src="${product.imageUrl}" style="height: 150px; width: 150px">
+            <h1 th:text="${'R$' + #numbers.formatDecimal(product.price, 1, 2, 'COMMA')}"></h1>
+            <p th:text="${product.description}"></p>
+            <form th:action="@{/carrinho/adicionarProduto/{productId}(productId = ${product.id})}" method="POST">
+                <label class="mb-2">Quantidade:</label>
+                <input type="number" name="productQuantity" min="1" value="1">
+                <button class="btn btn-success" type="submit">Adicionar ao carrinho <i class="bi bi-cart-plus"></i></button>
+            </form>
+        </div>
+
+    </div>
+
+</th:block>
+
+<th:block th:fragment="errorToast(errorMessages)">
+
+    <div aria-live="polite" aria-atomic="true"
+         class="position-fixed bottom-0 end-0 p-3"
+         style="z-index: 9999">
+        <div id="toastContainer">
+            <div th:each="msg, iterStat : ${errorMessages}"
+                 class="toast align-items-center text-white bg-danger border-0 mb-2"
+                 th:attr="id='errorToast__' + ${iterStat.index}, data-bs-delay=3000"
+                 role="alert">
+                <div class="d-flex">
+                    <div class="toast-body" th:text="${msg}">Erro!</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.querySelectorAll('[id^="errorToast__"]').forEach(toastEl => {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+        /*]]>*/
+    </script>
 
 </th:block>
 

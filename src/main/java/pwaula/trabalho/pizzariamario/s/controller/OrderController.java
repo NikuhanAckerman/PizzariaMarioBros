@@ -2,18 +2,19 @@ package pwaula.trabalho.pizzariamario.s.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import pwaula.trabalho.pizzariamario.s.dto.PizzaInCartDTO;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import pwaula.trabalho.pizzariamario.s.dto.ProductInCartDTO;
 import pwaula.trabalho.pizzariamario.s.model.*;
 import pwaula.trabalho.pizzariamario.s.repository.*;
-import pwaula.trabalho.pizzariamario.s.service.CartService;
 import pwaula.trabalho.pizzariamario.s.service.UserSessionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/pedido")
@@ -29,65 +30,74 @@ public class OrderController {
     private CartRepository cartRepository;
 
     @Autowired
-    private CartService cartService;
+    private ProductRepository productRepository;
 
     @Autowired
-    private PizzaRepository pizzaRepository;
+    private ProductInCartRepository productInCartRepository;
 
     @Autowired
-    private PizzaInCartRepository pizzaInCartRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private ClientRepository clientRepository;
 
     @GetMapping("/fazerPedido")
-    public ModelAndView makeOrder() {
-        UserEntity user = userSessionService.getUserEntity();
-        CartEntity cart = cartRepository.findById(user.getCartId()).get();
+    public String makeOrder(RedirectAttributes redirectAttributes, Model model) {
+        ClientEntity client = userSessionService.getClientEntity();
+        ModelAndView mv = new ModelAndView();
 
-        if(cart.getPizzasInCartId().isEmpty()) { // se nao tiver produto no carrinho, nem vai pra pagina de fazer pedido
-            return new ModelAndView("redirect:/");
+        CartEntity cart = cartRepository.findById(client.getCartId()).get();
+
+        if(cart.getProductsInCartId().isEmpty()) { // se nao tiver produto no carrinho, nem vai pra pagina de fazer pedido
+            List<String> erros = new ArrayList<>();
+            erros.add("Você não pode fazer um pedido sem produtos no carrinho.");
+            redirectAttributes.addFlashAttribute("erros", erros);
+            return "redirect:/";
         }
 
-        List<PizzaInCartEntity> pizzasInCart = pizzaInCartRepository.findAllById(cart.getPizzasInCartId());
+        List<ProductInCartEntity> productsInCart = productInCartRepository.findAllById(cart.getProductsInCartId());
 
-        List<PizzaInCartDTO> cartItems = pizzasInCart.stream()
-                .map(item -> new PizzaInCartDTO(
+        List<ProductInCartDTO> cartItems = productsInCart.stream()
+                .map(item -> new ProductInCartDTO(
                         item.getId(),
-                        pizzaRepository.findById(item.getPizzaId()).get().getName(),
-                        pizzaRepository.findById(item.getPizzaId()).get().getImageUrl(),
+                        productRepository.findById(item.getProductId()).get().getName(),
+                        productRepository.findById(item.getProductId()).get().getImageUrl(),
                         item.getIndividualPrice(),
                         item.getTotalPrice(),
                         item.getQuantityOrdered()
                 ))
                 .toList();
 
-        ModelAndView mv = new ModelAndView("order");
-        mv.addObject("cart", cart);
-        mv.addObject("pizzasInCart", cartItems);
+        model.addAttribute("cart", cart);
+        model.addAttribute("productsInCart", cartItems);
 
-        return mv;
+        return "order";
     }
 
     @PostMapping("/finalizarPedido")
-    public ModelAndView finalizeOrder() {
+    public String finalizeOrder(RedirectAttributes redirectAttributes) {
         System.out.println("CHAMOU A ROTA");
 
-        UserEntity user = userSessionService.getUserEntity();
-        CartEntity cart = cartRepository.findById(user.getCartId()).get();
+        ClientEntity client = userSessionService.getClientEntity();
+        CartEntity cart = cartRepository.findById(client.getCartId()).get();
 
-        List<PizzaInCartEntity> pizzaInCartList = pizzaInCartRepository.getPizzaInCartEntitiesByCartId(cart.getId());
+        List<ProductInCartEntity> productInCartList = productInCartRepository.getProductInCartEntitiesByCartId(cart.getId());
 
-        if(pizzaInCartList.isEmpty()) {
-            return new ModelAndView("redirect:/"); // sem produtos, de novo, nao precisa fazer o pedido
+        if(productInCartList.isEmpty()) {
+            return "redirect:/"; // sem produtos, de novo, nao precisa fazer o pedido
         }
 
-        BigDecimal totalPriceOrder = pizzaInCartList.stream()
-                .map(PizzaInCartEntity::getTotalPrice)
+        List<String> erros = new ArrayList<>();
+        if(productInCartList.stream().anyMatch(productInCartEntity ->
+                !productRepository.findById(productInCartEntity.getProductId()).get().isAvailableForProduction())) {
+            erros.add("Existe(m) algum(ns) produto(s) indisponível(is) no carrinho.");
+            redirectAttributes.addFlashAttribute("erros", erros);
+            return "redirect:/";
+        }
+
+        BigDecimal totalPriceOrder = productInCartList.stream()
+                .map(ProductInCartEntity::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         OrderEntity order = new OrderEntity();
-        order.setUserId(user.getId());
+        order.setClientId(client.getId());
         order.setTotalPrice(totalPriceOrder);
         order.setTimeOrderFinished(LocalDateTime.now());
         order.setStatus(OrderStatus.PEDIDO_RECEBIDO);
@@ -96,14 +106,14 @@ public class OrderController {
         orderRepository.save(order);
 
         CartEntity newCart = new CartEntity();
-        newCart.setUserId(user.getId());
+        newCart.setClientId(client.getId());
         cartRepository.save(newCart);
 
-        user.setCartId(newCart.getId());
-        user.getOrdersDoneId().add(order.getId());
-        userRepository.save(user);
+        client.setCartId(newCart.getId());
+        client.getOrdersDoneId().add(order.getId());
+        clientRepository.save(client);
 
-        return new ModelAndView("redirect:/perfil");
+        return "redirect:/perfil";
     }
 
 

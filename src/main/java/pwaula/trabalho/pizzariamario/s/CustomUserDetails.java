@@ -1,18 +1,21 @@
 package pwaula.trabalho.pizzariamario.s;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pwaula.trabalho.pizzariamario.s.model.CartEntity;
-import pwaula.trabalho.pizzariamario.s.model.OrderEntity;
+import org.springframework.stereotype.Service;
+import pwaula.trabalho.pizzariamario.s.model.ClientEntity;
 import pwaula.trabalho.pizzariamario.s.model.UserEntity;
+import pwaula.trabalho.pizzariamario.s.repository.ClientRepository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class CustomUserDetails implements UserDetails {
+
+    private ClientRepository clientRepository;
 
     private final UserEntity user;
 
@@ -20,28 +23,36 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
+    private ClientEntity getClientFromUser(UserEntity user) {
+        return clientRepository.findClientEntityByUserId(user.getId());
+    }
+
+    public String getId() {
+        return user.getId();
+    }
+
     public String getName() {
-        return user.getName();
+        return getClientFromUser(user).getName();
     }
 
     public String getPhone() {
-        return user.getPhone();
+        return getClientFromUser(user).getPhone();
     }
 
     public String getAddress() {
-        return user.getAddress();
+        return getClientFromUser(user).getAddress();
     }
 
     public String getCpf() {
-        return user.getCpf();
+        return getClientFromUser(user).getCpf();
     }
 
     public String getCartId() {
-        return user.getCartId();
+        return getClientFromUser(user).getCartId();
     }
 
     public List<String> getOrdersDoneId() {
-        return user.getOrdersDoneId();
+        return getClientFromUser(user).getOrdersDoneId();
     }
 
     public String roles() {

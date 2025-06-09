@@ -9,12 +9,12 @@ import java.math.BigDecimal;
 
 @Getter @Setter
 @Document(collection = "LocalPizzaOrderedEntity")
-public class LocalPizzaOrderedEntity {
+public class LocalProductOrderedEntity {
 
     @Id
     private String id;
 
-    private String pizzaId;
+    private String productId;
 
     private String localOrderId;
 

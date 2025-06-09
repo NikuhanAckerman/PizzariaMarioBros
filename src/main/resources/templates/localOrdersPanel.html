@@ -19,12 +19,17 @@
 <div class="container mt-5 text-center">
 
     <h1 class="mb-4 text-center">Gerenciar Pedidos Locais</h1>
-    <a class="btn btn-outline-warning header-text mb-3" th:href="@{/admin/vendas/local/criarPedidoLocal}" style="text-decoration: none">
+
+    <a class="btn btn-secondary header-text mb-3" th:href="@{/atendente/vendas}" style="text-decoration: none">
+        <i class="bi bi-arrow-left-circle"></i> Voltar
+    </a>
+
+    <a class="btn btn-outline-warning header-text mb-3" th:href="@{/atendente/vendas/local/criarPedidoLocal}" style="text-decoration: none">
         Criar pedido <i class="bi bi-plus-square-fill"></i>
     </a>
 
     <!-- Filtro de Data -->
-    <form class="row g-3 mb-4" th:action="@{/admin/vendas/local}">
+    <form class="row g-3 mb-4" th:action="@{/atendente/vendas/local}">
         <div class="col-md-6">
             <label for="dataInicio" class="form-label">Filtrar por Data de Início (Mostrar pedidos de após essa data)</label>
             <input type="date" class="form-control" id="dataInicio" name="startDate">
@@ -75,9 +80,9 @@
                     <div class="collapse mt-2" th:id="'infoPedido-' + ${order.id}">
                         <ul class="list-group list-group-flush text-start">
                             <strong th:text="${'Preço total do pedido: R$' + #numbers.formatDecimal(order.totalPrice, 1, 2, 'COMMA')}"></strong>
-                            <li class="list-group-item" th:each="item : ${order.pizzasOrderedList}">
+                            <li class="list-group-item" th:each="item : ${order.productsOrderedList}">
                                 <strong th:text="${item.quantityOrdered} + 'x'"></strong>
-                                <span th:text="${item.pizzaName}"></span> -
+                                <span th:text="${item.productName}"></span> -
                                 <span th:text="'R$' + ${#numbers.formatDecimal(item.totalPrice, 1, 2, 'COMMA')}"></span>
                             </li>
                         </ul>
@@ -86,18 +91,18 @@
                 <td th:text="${#temporals.format(order.orderedAtTime, 'dd/MM/yyyy HH:mm:ss')}"></td>
                 <td th:text="${#temporals.format(order.tableFinishedAtTime, 'dd/MM/yyyy HH:mm:ss')}"></td>
                 <td>
-                    <form th:action="@{/admin/vendas/local/terminarPedidoLocal/{localOrderId}(localOrderId = ${order.id})}" method="POST">
+                    <form th:action="@{/atendente/vendas/local/terminarPedidoLocal/{localOrderId}(localOrderId = ${order.id})}" method="POST">
                         <input type="hidden" name="_method" value="PUT">
                         <button type="submit" class="btn btn-outline-secondary">Terminar pedido</button>
                     </form>
                 </td>
                 <td>
-                    <a th:href="@{/admin/vendas/local/atualizarPedidoLocal/{localOrderId}(localOrderId = ${order.id})}">
+                    <a th:href="@{/atendente/vendas/local/atualizarPedidoLocal/{localOrderId}(localOrderId = ${order.id})}">
                         <button type="submit" class="btn btn-outline-info">Atualizar pedido</button>
                     </a>
                 </td>
                 <td>
-                    <form th:action="@{/admin/vendas/local/deletarPedidoLocal/{localOrderId}(localOrderId = ${order.id})}" method="POST">
+                    <form th:action="@{/atendente/vendas/local/deletarPedidoLocal/{localOrderId}(localOrderId = ${order.id})}" method="POST">
                         <input type="hidden" name="_method" value="DELETE">
                         <button type="submit" class="btn btn-outline-danger">Deletar pedido</button>
                     </form>

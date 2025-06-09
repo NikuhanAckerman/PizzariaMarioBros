@@ -13,7 +13,7 @@
 <div class="container py-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="fw-bold">Pedidos online (Delivery) 🍕</h1>
-    <a th:href="@{/admin}" class="btn btn-secondary">
+    <a th:href="@{/atendente/vendas}" class="btn btn-secondary">
       <i class="bi bi-arrow-left-circle"></i> Voltar
     </a>
   </div>
@@ -33,7 +33,7 @@
       </thead>
       <tbody th:if="${orders}" th:each="order : ${orders}">
       <tr>
-        <td th:text="${order.userOrderedId}">Id</td>
+        <td th:text="${order.clientId}">Id</td>
         <td th:text="${order.userOrderedName}">Nome</td>
         <td th:text="${order.userOrderedAddress}">Endereço completo</td>
         <td th:text="${order.userOrderedPhone}">(00) 00000-0000</td>
@@ -52,17 +52,15 @@
 
           <div th:id="'collapse-' + ${order.orderId}" class="collapse">
 
-
-
             <div class="border rounded p-3 mb-3">
               <p><strong>Data-hora do pedido:</strong> <span th:text="${#temporals.format(order.order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
               <p><strong>Status:</strong> <span class="badge text-bg-primary" th:text="${order.order.status}"></span></p>
 
               <h6>Pizzas:</h6>
               <div class="d-flex flex-wrap text-center">
-                <li  style="padding: 10px; gap: 5px; border: solid 2px black; border-radius: 20px" class="me-5 mb-3" th:each="item : ${order.order.pizzasInOrder}">
-                  <img class="text-center" th:src="${item.pizzaImageUrl}" style="width: 150px; height: 150px;">
-                  <h5 th:text="${item.pizzaName}"></h5>
+                <li  style="padding: 10px; gap: 5px; border: solid 2px black; border-radius: 20px" class="me-5 mb-3" th:each="item : ${order.order.productsInOrder}">
+                  <img class="text-center" th:src="${item.productImageUrl}" style="width: 150px; height: 150px;">
+                  <h5 th:text="${item.productName}"></h5>
                   <span th:text="${'Preço unitário: R$' + #numbers.formatDecimal(item.individualPrice, 1, 2, 'COMMA') + ' - '}"></span>
 
                   <span th:text="'Quantidade: ' + ${item.quantityOrdered}"></span>
@@ -77,7 +75,7 @@
 
         </td>
         <td>
-          <form th:action="@{/admin/vendas/delivery/mudarStatus/{orderId}(orderId = ${order.orderId})}" method="POST">
+          <form th:action="@{/atendente/vendas/delivery/mudarStatus/{orderId}(orderId = ${order.orderId})}" method="POST">
             <input type="hidden" name="_method" value="PUT">
             <select class="form-select" name="status" aria-label="Selecione status" onchange="this.form.submit()">
               <option selected disabled>Status do pedido</option>

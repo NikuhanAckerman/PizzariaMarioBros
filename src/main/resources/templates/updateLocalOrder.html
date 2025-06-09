@@ -10,9 +10,9 @@
 
 <div class="container mt-5">
   <h2 class="mb-4 text-center">Criar Pedido Local</h2>
-  <a class="btn btn-outline-danger mb-4" th:href="@{/admin/vendas/local}">← Voltar</a>
+  <a class="btn btn-outline-danger mb-4" th:href="@{/atendente/vendas/local}">← Voltar</a>
 
-  <form th:action="@{/admin/vendas/local/atualizarPedidoLocal/{localOrderId}(localOrderId = ${newLocalOrderDTO.id})}" method="POST">
+  <form th:action="@{/atendente/vendas/local/atualizarPedidoLocal/{localOrderId}(localOrderId = ${newLocalOrderDTO.id})}" method="POST">
     <input type="hidden" name="_method" value="PUT">
     <!-- Campo da mesa -->
     <div class="mb-3">
@@ -30,25 +30,23 @@
       </select>
     </div>
 
-    <!-- Lista de pizzas -->
     <div class="mb-3">
-      <label class="form-label">Pizzas Pedidas</label>
+      <label class="form-label">Produtos Pedidos</label>
 
-      <div class="row row-cols-1 row-cols-md-2 g-4">
-        <div class="col" th:each="pizza : ${pizzas}">
+      <div class="row row-cols-1 row-cols-md-5 g-4">
+        <div class="col" th:each="product : ${products}">
           <div class="card h-100">
-            <img th:src="${pizza.imageUrl}" class="card-img-top" alt="Pizza" style="height: 200px; object-fit: cover;">
+            <img th:src="${product.imageUrl}" class="card-img-top" alt="Produto" style="height: 200px; object-fit: cover;">
             <div class="card-body">
-              <h5 class="card-title" th:text="${pizza.name}">Nome da Pizza</h5>
-              <p class="card-text">Preço: R$ <span th:text="${#numbers.formatDecimal(pizza.price, 1, 2, 'COMMA')}"></span></p>
+              <h5 class="card-title" th:text="${product.name}">Nome do Produto</h5>
+              <p class="card-text">Preço: R$ <span th:text="${#numbers.formatDecimal(product.price, 1, 2, 'COMMA')}"></span></p>
 
               <label for="quantidade" class="form-label">Quantidade</label>
               <input type="number"
                      class="form-control"
                      min="0"
-                     max="10"
                      id="quantidade"
-                     th:name="${pizza.id}"
+                     th:name="${product.id}"
                      value="0" />
             </div>
           </div>
@@ -59,6 +57,10 @@
     <button type="submit" class="btn btn-success mt-4">Finalizar Pedido</button>
   </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+
+<div th:replace="fragments/fragments :: errorToast(${erros})"></div>
 
 </body>
 </html>

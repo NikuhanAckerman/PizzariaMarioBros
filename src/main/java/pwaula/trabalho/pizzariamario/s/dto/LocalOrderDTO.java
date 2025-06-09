@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LocalOrderDTO {
     private String id;
-    private List<LocalPizzaOrderDTO> pizzasOrderedList;
+    private List<LocalProductOrderDTO> productsOrderedList;
     private LocalOrderTable orderTable;
     private LocalDateTime orderedAtTime;
     private LocalDateTime tableFinishedAtTime;

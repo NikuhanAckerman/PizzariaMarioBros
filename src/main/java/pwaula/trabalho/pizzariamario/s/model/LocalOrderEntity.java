@@ -17,7 +17,7 @@ public class LocalOrderEntity {
     @Id
     private String id;
 
-    private List<String> pizzasOrderedList = new ArrayList<>();
+    private List<String> productsOrderedList = new ArrayList<>();
 
     private LocalOrderTable orderTable;
 

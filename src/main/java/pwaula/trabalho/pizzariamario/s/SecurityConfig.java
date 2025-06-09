@@ -26,7 +26,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/cadastrar", "/css/**", "/dist/**", "/plugins/**", "/js/**", "/images/**").permitAll() // Permitir acesso à página de login e arquivos estáticos
+                        .requestMatchers("/carrinho/**", "/perfil", "/pedido/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/atendente/**").hasAnyRole("ATENDENTE", "ADMIN")
                         .anyRequest().authenticated() // Exigir autenticação para qualquer outra página
                 )
                 .formLogin(form -> form
