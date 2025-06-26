@@ -59,6 +59,7 @@ public class CartController {
         }
 
         if(!product.isAvailableForProduction()) {
+            System.out.println("adsada indisponivel lol");
             erros.add("O produto está indisponível no momento.");
         }
 

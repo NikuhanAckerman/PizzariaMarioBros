@@ -252,6 +252,7 @@ public class AttendantController {
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
             String productId = entry.getKey();
+            System.out.println(entry.getKey() + " " + entry.getValue());
             int quantity = Integer.parseInt(entry.getValue());
 
             if (quantity > 0) {

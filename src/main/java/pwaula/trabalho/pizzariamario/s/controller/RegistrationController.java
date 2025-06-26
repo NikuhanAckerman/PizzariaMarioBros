@@ -80,6 +80,7 @@ public class RegistrationController {
         client.setEmail(username);
 
         user.setPassword(passwordEncoder.encode(password));
+
         client.setPhone(phone);
         client.setAddress(address);
         client.setCpf(cpf);
@@ -90,6 +91,7 @@ public class RegistrationController {
         client.setCartId(cart.getId());
 
         userRepository.save(user);
+        client.setUserId(user.getId());
         clientRepository.save(client);
 
         ModelAndView mv = new ModelAndView("redirect:/login");

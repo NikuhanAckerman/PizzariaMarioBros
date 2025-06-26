@@ -40,13 +40,11 @@
 
                 <div th:replace="~{fragments/fragments :: logoutButton}"></div>
 
-                <div th:if="${canHaveControlPanelButton == true}">
-                    <div th:replace="fragments/fragments :: controlPanelButton"></div>
-                </div>
-
             </div>
 
-
+            <div th:if="${canHaveControlPanelButton == true}">
+                <div th:replace="fragments/fragments :: controlPanelButton"></div>
+            </div>
 
 
         </div>
